@@ -29,7 +29,6 @@ jobs:
           chart: ~/project/chart/hello
           helm-version: v3.2.4
           release-name: helloapp
-          tag: "$CIRCLE_SHA1"
 
 workflows:
   build_and_push_image:
