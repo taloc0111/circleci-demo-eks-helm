@@ -29,8 +29,7 @@ jobs:
           chart: ~/project/chart/hello
           helm-version: v3.2.4
           release-name: helloapp
-          image.repository: AWS_ECR_URL/helloapp
-          image.tag: "$CIRCLE_SHA1"
+          tag: "$CIRCLE_SHA1"
 
 workflows:
   build_and_push_image:
@@ -47,7 +46,5 @@ workflows:
           tag: "$CIRCLE_SHA1"
       - install-helm-chart:
           cluster-name: terraform-eks-demo
-          image.repository: AWS_ECR_URL/helloapp
-          image.tag: "$CIRCLE_SHA1"
           requires:
             - aws-ecr/build-and-push-image
