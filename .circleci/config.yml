@@ -1,0 +1,45 @@
+version: 2.1
+
+orbs:
+  aws-ecr: circleci/aws-ecr@6.7.0
+  aws-eks: circleci/aws-eks@0.2
+  helm: circleci/helm@1.0
+
+jobs:
+  install-helm-chart:
+    executor: aws-eks/python
+    parameters:
+      cluster-name:
+        description: Cluster name
+        type: string
+    steps:
+      - checkout
+      - run:
+          name: check source
+          command: |
+            ls -la
+            pwd
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+      - helm/install-helm-chart:
+          chart: ~/project/charts/hello
+          helm-version: v3.2.4
+          release-name: helloapp
+
+workflows:
+  build_and_push_image:
+    jobs:
+      - aws-ecr/build-and-push-image:
+          account-url: AWS_ECR_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: Dockerfile
+          path: .
+          region: AWS_REGION
+          repo: helloapp
+          tag: "$CIRCLE_SHA1"
+      - install-helm-chart:
+          cluster-name: terraform-eks-demo
+          requires:
+            - aws-ecr/build-and-push-image
