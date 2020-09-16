@@ -16,6 +16,7 @@ jobs:
             pip install awscli
       - run:
           name: Get the kubeconfig file
+          command: |
             aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
             cat ~/.kube/config
       #- run:
