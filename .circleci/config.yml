@@ -4,7 +4,7 @@ orbs:
   aws-ecr: circleci/aws-ecr@6.7.0
 
 jobs:
-  build: 
+  deploy: 
     docker:
       - image: dtzar/helm-kubectl
     steps:
@@ -22,11 +22,12 @@ jobs:
       - run:
           name: Helm Upgrade Or Install
           command: |
-            helm install helloapp ~/project/chart/hello/ --namespace default --set image.repository=686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp --set image.tag=$CIRCLE_SHA1    
+            helm upgrade helloapp ~/project/chart/hello/ --namespace default --set image.repository=686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp --set image.tag=$CIRCLE_SHA1    
 workflows:
   build_and_push_image:
     jobs:
       - aws-ecr/build-and-push-image:
+          name: build
           account-url: AWS_ECR_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
@@ -36,6 +37,10 @@ workflows:
           region: AWS_REGION
           repo: helloapp
           tag: "$CIRCLE_SHA1"
-      - build:
+      - hold:
+          type: approval
           requires:
-            - aws-ecr/build-and-push-image
+            - build
+      - deploy:
+          requires:
+            - hold
