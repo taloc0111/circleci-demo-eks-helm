@@ -4,7 +4,7 @@ orbs:
   aws-ecr: circleci/aws-ecr@6.7.0
 
 jobs:
-  builb_and_push_image:
+  builb:
     docker: 
       image: docker:latest
     steps:
@@ -45,11 +45,11 @@ jobs:
 workflows:
   build_and_push_image:
     jobs:
-      - builb_and_push_image
+      - builb
       - hold:
           type: approval
           requires:
-            - builb_and_push_image
+            - builb
       - deploy:
           requires:
             - hold
