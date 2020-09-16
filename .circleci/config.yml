@@ -6,14 +6,14 @@ orbs:
 jobs:
   build:
     docker:
-      - image: ubuntu:artful
+      - image: thorstenhans/helm3
     steps:
-      - checkout
       - run:
           name: Install AWS cli
           command: |
             apt-get update
             apt-get install -y awscli
+            app-get install -y git
 workflows:
   build_and_push_image:
     jobs:
