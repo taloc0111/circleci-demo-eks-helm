@@ -6,14 +6,14 @@ orbs:
 jobs:
   build:
     docker:
-      - image: thorstenhans/helm3
+      - image: dtzar/helm-kubectl:latest
     steps:
       - checkout
       - run:
           name: Install AWS cli
           command: |
-            sudo apt-get update
-            sudo apt-get install -y awscli
+            apt-get update
+            apt-get install -y awscli
 workflows:
   build_and_push_image:
     jobs:
