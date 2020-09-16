@@ -11,6 +11,7 @@ jobs:
       - run:
           name: Install AWS cli
           command: |
+            chown -R $USER:$USER ~
             sudo mkdir ~/project
             sudo apt-get update
             sudo apt-get install -y awscli
