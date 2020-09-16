@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   builb:
     docker: 
-      - image: circleci/golang:1.13-alpine
+      - image: circleci/golang:1.13
     steps:
       - checkout
       - setup_remote_docker:
