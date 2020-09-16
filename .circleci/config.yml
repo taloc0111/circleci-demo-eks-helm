@@ -9,7 +9,12 @@ jobs:
       - image: circleci/golang:1.10
     steps:
       - checkout
-      - run: apt-get update -y
+      - run: 
+        name: Install AWS cli
+        command: | 
+          sudo apt-get update -y
+          sudo apt-get install -y awscli
+        
 #workflows:
 #  build_and_push_image:
 #    jobs:
