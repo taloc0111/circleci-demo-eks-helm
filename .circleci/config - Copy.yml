@@ -1,0 +1,45 @@
+version: 2.1
+
+orbs:
+  aws-ecr: circleci/aws-ecr@6.7.0
+  eks: tiendanube/eks@1.3.0
+
+jobs:
+  deploy:
+    jobs:
+      - checkout
+      - run:
+          name: check source
+          command: |
+            ls -la
+            pwd
+      - eks/helm-deploy:
+          cluster-name: terraform-eks-demo
+          region: aws-region
+          release-name: helloapp
+          values-file: values.yaml
+          namespace: default
+          chart: ~/project/chart/hello
+          chart-version: latest
+          image-tag: ${CIRCLE_SHA1:0:7}
+          resource-name: ~/project/chart/hello
+          rollout-status: true
+          rollout-status-watch: true
+          rollout-status-timeout: 5m
+workflows:
+  build_and_push_image:
+    jobs:
+      - aws-ecr/build-and-push-image:
+          account-url: AWS_ECR_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: Dockerfile
+          path: .
+          region: AWS_REGION
+          repo: helloapp
+          tag: "$CIRCLE_SHA1"
+      - deploy:
+          cluster-name: terraform-eks-demo
+          requires:
+            - aws-ecr/build-and-push-image
