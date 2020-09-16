@@ -9,9 +9,11 @@ jobs:
       - image: yjkim1ntels/helm3-kubectl-docker:latest
     steps:
       - checkout
-      - run: |
-          apt-get update
-          apt-get install -y awscli
+      - run:
+          name: Install AWS cli
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y awscli
 workflows:
   build_and_push_image:
     jobs:
