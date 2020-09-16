@@ -3,29 +3,32 @@ version: 2.1
 orbs:
   aws-ecr: circleci/aws-ecr@6.7.0
   aws-eks: circleci/aws-eks@0.2
+  helm: circleci/helm@1.0
 
 jobs:
   install-helm-chart:
-    docker:
-      image: yjkim1ntels/helm3-kubectl-docker
+    executor: aws-eks/python
+    parameters:
+      cluster-name:
+        description: Cluster name
+        type: string
     steps:
       - checkout
       - run:
           name: check source
-            command: |
-              ls -la
-              pwd
-      - run: 
-          name: Install AWS cli
-            command: |
-              sudo apt-get update
-              sudo apt-get install -y awscli
+          command: |
+            ls -la
+            pwd
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
       - run:
-          name: Get the kubeconfig file
-            comnand: |
-              helm version
-              aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
-              cat ~/.kube/config   
+          name: check kubeconfig file
+          command: |
+            cat ~/.kube/config    
+      - helm/install-helm-chart:
+          chart: ~/project/chart/hello
+          helm-version: v3.2.4
+          release-name: helloapp
 
 workflows:
   build_and_push_image:
