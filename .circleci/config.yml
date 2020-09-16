@@ -3,9 +3,11 @@ version: 2.1
 jobs:
   builb:
     docker: 
-      - image: docker:18.06.0-ce-git
+      - image: docker:latest
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: false
       - run:
           name: Install AWS CLI
           command: | 
@@ -15,7 +17,6 @@ jobs:
           name: Build Image
           command: | 
             $(aws ecr get-login --no-include-email --region us-east-1)
-            systemctl start docker
             docker build -t 686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp:$CIRCLE_SHA1 .
           environment:
             DOCKER_HOST: tcp://docker:2375/
