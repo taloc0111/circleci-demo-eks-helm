@@ -18,6 +18,7 @@ jobs:
     docker:
       - image: dtzar/helm-kubectl
     steps:
+      - checkout
       - run: 
           name: Install AWS cli
           command: | 
