@@ -3,33 +3,57 @@ version: 2.1
 orbs:
   aws-ecr: circleci/aws-ecr@6.7.0
   aws-eks: circleci/aws-eks@0.2
+  aws-cli: circleci/aws-cli@0.1.14
 
 jobs:
-  install-helm-chart:
-    executor: yjkim1ntels/helm3-kubectl-docker
+  setup-kube:
+    executor: aws-eks/python
     parameters:
       cluster-name:
         description: Cluster name
         type: string
     steps:
-      - checkout
+      - aws-cli/configure
       - run:
-          name: check source
+          name: Configure Kubernetes Client
           command: |
-            ls -la
-            pwd
-      - run: 
-          name: Install AWS cli
-            command: |
-              sudo apt-get update
-              sudo apt-get install -y awscli
+            aws eks update-kubeconfig --name  << parameters.cluster >>
+            kubectl config set-context $(kubectl config current-context) --namespace << parameters.namespace >>
+            # sanity check
+            kubectl get services
+  init-helmv3:
+    parameters:
+      chart:
+        type: string
+    steps:
+      - checkout
+      - aws-cli/configure
       - run:
-          name: Get the kubeconfig file
-            comnand: |
-              helm version
-              aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
-              cat ~/.kube/config   
+          name: Initialise Helm
+          command: |
+            helm list | grep << parameters.chart >>
+            cat ~/.kube/config
 
+  upgrade-or-install:
+    parameters:
+      helmparams:
+        default:
+        type: string
+      chart:
+        type: string
+      language:
+        default: 'js'
+        description: Chart type for helm - defaults to "js"
+        type: enum
+        enum: ['js', 'go']
+    steps:
+      - aws-cli/configure
+      - run:
+          name: Update Cluster
+          command: |
+            pwd
+            ls -lah 
+            helm upgrade --install << parameters.chart >> << parameters.helmparams>> ./charts/sibi<< parameters.language >>/ 
 workflows:
   build_and_push_image:
     jobs:
@@ -43,7 +67,15 @@ workflows:
           region: AWS_REGION
           repo: helloapp
           tag: "$CIRCLE_SHA1"
-      - install-helm-chart:
+      - setup-kube:
           cluster-name: terraform-eks-demo
           requires:
             - aws-ecr/build-and-push-image
+      - init-helmv3:
+          cluster-name: terraform-eks-demo
+          requires:
+            - setup-kube
+      - upgrade-or-install:
+          cluster-name: terraform-eks-demo
+          requires:
+            - init-helmv3
