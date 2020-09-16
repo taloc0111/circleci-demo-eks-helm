@@ -25,7 +25,7 @@ workflows:
           region: AWS_REGION
           repo: helloapp
           tag: "$CIRCLE_SHA1"
-      - deploy:
+      - build:
           cluster-name: terraform-eks-demo
           requires:
             - aws-ecr/build-and-push-image
