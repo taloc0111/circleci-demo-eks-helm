@@ -15,7 +15,7 @@ jobs:
           name: Build Image
           command: | 
             $(aws ecr get-login --no-include-email --region us-east-1)
-            service docker start
+            systemctl start docker
             docker build -t 686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp:$CIRCLE_SHA1 .
       - run:
           name: Push Image
