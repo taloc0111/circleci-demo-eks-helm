@@ -4,16 +4,6 @@ orbs:
   aws-ecr: circleci/aws-ecr@6.7.0
 
 jobs:
-  checkout:
-    docker:
-      - image: circleci/golang:1.10
-    steps:
-      - checkout
-      - run: 
-          name: checkout
-          command: | 
-            ls -la
-            pwd
   build: 
     docker:
       - image: dtzar/helm-kubectl
