@@ -7,7 +7,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          docker_layer_caching: false
+          latest
       - run:
           name: Install AWS CLI
           command: | 
@@ -19,7 +19,7 @@ jobs:
             $(aws ecr get-login --no-include-email --region us-east-1)
             docker build -t 686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp:$CIRCLE_SHA1 .
           environment:
-            DOCKER_HOST: tcp://0.0.0.0:2375/
+            DOCKER_HOST: tcp://localhost:2375/
             DOCKER_DRIVER: overlay2
             # See https://github.com/docker-library/docker/pull/166
             DOCKER_TLS_CERTDIR: ""
@@ -28,7 +28,7 @@ jobs:
           command: | 
             docker push 686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp:$CIRCLE_SHA1      
           environment:
-            DOCKER_HOST: tcp://0.0.0.0:2375/
+            DOCKER_HOST: tcp://localhost:2375/
             DOCKER_DRIVER: overlay2
             # See https://github.com/docker-library/docker/pull/166
             DOCKER_TLS_CERTDIR: ""
