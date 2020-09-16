@@ -1,109 +1,45 @@
-# This code is licensed from CircleCI to the user under the MIT license. See
-# https://circleci.com/orbs/registry/licensing for details.
-# https://circleci.com/orbs/registry/licensing for details.
 version: 2.1
+
 orbs:
-  aws-cli: circleci/aws-cli@0.1.14
+  aws-ecr: circleci/aws-ecr@6.7.0
+  eks: tiendanube/eks@1.3.0
 
-description: |
-  Deploy a helm chart on AWS EKS
-commands:
-  setup-kube:
-    parameters:
-      cluster:
-        type: string
-      namespace:
-        default: default
-        type: string
-    steps:
-      - aws-cli/configure
+jobs:
+  deploy:
+    jobs:
+      - checkout
       - run:
-          name: Configure Kubernetes Client
+          name: check source
           command: |
-            aws eks update-kubeconfig --name  << parameters.cluster >>
-            kubectl config set-context $(kubectl config current-context) --namespace << parameters.namespace >>
-            # sanity check
-            kubectl get services
-
-  init-helm:
-    parameters:
-      chart:
-        type: string
-    steps:
-      - aws-cli/configure
-      - run:
-          name: Initialise Helm
-          command: |
-            helm init --client-only
-            helm list | grep << parameters.chart >>
-  init-helmv3:
-    parameters:
-      chart:
-        type: string
-    steps:
-      - aws-cli/configure
-      - run:
-          name: Initialise Helm
-          command: |
-            helm list | grep << parameters.chart >>
-  upgrade:
-    parameters:
-      helmparams:
-        default:
-        type: string
-      chart:
-        type: string
-      language:
-        default: 'js'
-        description: Chart type for helm - defaults to "js"
-        type: enum
-        enum: ['js', 'go']
-    steps:
-      - aws-cli/configure
-      - run:
-          name: Update Cluster
-          command: |
+            ls -la
             pwd
-            ls -lah 
-            helm upgrade << parameters.chart >> << parameters.helmparams >> ./charts/sibi<< parameters.language >>/
-  upgrade-or-install:
-    parameters:
-      helmparams:
-        default:
-        type: string
-      chart:
-        type: string
-      language:
-        default: 'js'
-        description: Chart type for helm - defaults to "js"
-        type: enum
-        enum: ['js', 'go']
-    steps:
-      - aws-cli/configure
-      - run:
-          name: Update Cluster
-          command: |
-            pwd
-            ls -lah 
-            helm upgrade --install << parameters.chart >> << parameters.helmparams>> ./charts/sibi<< parameters.language >>/
-  roll-back:
-    parameters:
-      helmparams:
-        default:
-        type: string
-      chart:
-        type: string
-    steps:
-      - aws-cli/configure
-      - run:
-          name: Rollback Deployment
-          command: |
-            helm rollback << parameters.chart >> $(helm history << parameters.chart >> | grep DEPLOYED | awk '{print $1}') || export STATUS=$?
-            exit ${STATUS}
-executors:
-  default:
-    docker:
-      - image: sibipro/sibi-helm:549a925e46f5
-  helmv3:
-    docker:
-      - image: sibipro/sibi-helm:0.2
+      - eks/helm-deploy:
+          cluster-name: terraform-eks-demo
+          region: aws-region
+          release-name: helloapp
+          values-file: values.yaml
+          namespace: default
+          chart: ~/project/chart/hello
+          chart-version: latest
+          image-tag: ${CIRCLE_SHA1:0:7}
+          resource-name: ~/project/chart/hello
+          rollout-status: true
+          rollout-status-watch: true
+          rollout-status-timeout: 5m
+workflows:
+  build_and_push_image:
+    jobs:
+      - aws-ecr/build-and-push-image:
+          account-url: AWS_ECR_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: Dockerfile
+          path: .
+          region: AWS_REGION
+          repo: helloapp
+          tag: "$CIRCLE_SHA1"
+      - deploy:
+          cluster-name: terraform-eks-demo
+          requires:
+            - aws-ecr/build-and-push-image
