@@ -4,24 +4,33 @@ orbs:
   aws-ecr: circleci/aws-ecr@6.7.0
 
 jobs:
-  build:
+  checkout:
     docker:
       - image: circleci/golang:1.10
     steps:
       - checkout
       - run: 
+          name: checkout
+          command: | 
+            ls -la
+            pwd
+  build: 
+    docker:
+      - image: dtzar/helm-kubectl
+    steps:
+      - run: 
           name: Install AWS cli
           command: | 
-            sudo apt-get update -y
-            sudo apt-get install -y awscli
-      - run:
-          name: Install and confgure kubectl
-          command: sudo curl -L https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && sudo chmod +x /usr/local/bin/kubectl
-      - run:
-          name: Get the kubeconfig file
-          command: |
-            aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
-            cat ~/.kube/config      
+            ls -la
+            pwd  
+      #- run:
+      #    name: Install and confgure kubectl
+      #    command: sudo curl -L https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && sudo chmod +x /usr/local/bin/kubectl
+      #- run:
+      #    name: Get the kubeconfig file
+      #    command: |
+      #      aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
+      #      cat ~/.kube/config      
 #workflows:
 #  build_and_push_image:
 #    jobs:
