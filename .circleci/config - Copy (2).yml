@@ -4,25 +4,6 @@ orbs:
   aws-ecr: circleci/aws-ecr@6.7.0
 
 jobs:
-  builb_and_push_image:
-    docker: 
-      image: docker:latest
-    steps:
-      - checkout
-      - run:
-          name: Install AWS cli
-          command: | 
-            apk add --no-cache curl jq py-pip
-            pip install awscli 
-      - run:
-          name: Build Image
-          command: | 
-            $(aws ecr get-login --no-include-email --region us-east-1)
-            docker build -t 686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp:$CIRCLE_SHA1 .
-      - run:
-          name: Push Image
-          command: | 
-            docker push 686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp:$CIRCLE_SHA1      
   deploy: 
     docker:
       - image: dtzar/helm-kubectl
@@ -45,11 +26,21 @@ jobs:
 workflows:
   build_and_push_image:
     jobs:
-      - builb_and_push_image
+      - aws-ecr/build-and-push-image:
+          name: build
+          account-url: AWS_ECR_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: Dockerfile
+          path: .
+          region: AWS_REGION
+          repo: helloapp
+          tag: "$CIRCLE_SHA1"
       - hold:
           type: approval
           requires:
-            - builb_and_push_image
+            - build
       - deploy:
           requires:
             - hold
