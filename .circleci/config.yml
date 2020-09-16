@@ -7,7 +7,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          latest
+          version: 19.03.12
       - run:
           name: Install AWS CLI
           command: | 
