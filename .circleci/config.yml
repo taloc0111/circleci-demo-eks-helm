@@ -11,22 +11,23 @@ jobs:
       - run:
           name: Install AWS cli
           command: |
-            apt-get update
-            apt-get install -y awscli
-            app-get install -y git
+            sudo mkdir ~/project
+            sudo apt-get update
+            sudo apt-get install -y awscli
+            sudo app-get install -y git
 workflows:
   build_and_push_image:
     jobs:
-      - aws-ecr/build-and-push-image:
-          account-url: AWS_ECR_URL
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          create-repo: true
-          dockerfile: Dockerfile
-          path: .
-          region: AWS_REGION
-          repo: helloapp
-          tag: "$CIRCLE_SHA1"
+      #- aws-ecr/build-and-push-image:
+      #    account-url: AWS_ECR_URL
+      #    aws-access-key-id: AWS_ACCESS_KEY_ID
+      #    aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+      #    create-repo: true
+      #    dockerfile: Dockerfile
+      #    path: .
+      #    region: AWS_REGION
+      #    repo: helloapp
+      #    tag: "$CIRCLE_SHA1"
       - build:
-          requires:
-            - aws-ecr/build-and-push-image
+      #    requires:
+      #      - aws-ecr/build-and-push-image
