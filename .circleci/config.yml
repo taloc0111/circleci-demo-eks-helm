@@ -7,13 +7,17 @@ orbs:
 jobs:
   install-helm-chart:
     executor: yjkim1ntels/helm3-kubectl-docker
+    parameters:
+      cluster-name:
+        description: Cluster name
+        type: string
     steps:
       - checkout
       - run:
           name: check source
-            command: |
-              ls -la
-              pwd
+          command: |
+            ls -la
+            pwd
       - run: 
           name: Install AWS cli
             command: |
