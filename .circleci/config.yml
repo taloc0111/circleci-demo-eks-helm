@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   builb:
     docker: 
-      image: docker:latest
+      - image: docker:latest
     steps:
       - checkout
       - run:
