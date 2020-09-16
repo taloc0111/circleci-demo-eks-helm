@@ -21,6 +21,7 @@ jobs:
       - run:
           name: Push Image
           command: | 
+            $(aws ecr get-login --no-include-email --region us-east-1)
             docker push 686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp:$CIRCLE_SHA1      
   deploy: 
     docker:
