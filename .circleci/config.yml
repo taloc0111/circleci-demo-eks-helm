@@ -7,7 +7,6 @@ orbs:
 
 jobs:
   setup-kube:
-    executor: aws-eks/python
     parameters:
       cluster-name:
         description: Cluster name
@@ -79,3 +78,10 @@ workflows:
           cluster-name: terraform-eks-demo
           requires:
             - init-helmv3
+executors:
+  default:
+    docker:
+      - image: sibipro/sibi-helm:549a925e46f5
+  helmv3:
+    docker:
+      - image: sibipro/sibi-helm:0.2
