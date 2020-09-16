@@ -8,12 +8,7 @@ jobs:
     docker:
       - image: alpine/helm:3.3.1
     steps:
-      - run:
-          name: Install AWS cli
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y awscli
-            sudo app-get install -y git
+      - run: apt-get update -y
 #workflows:
 #  build_and_push_image:
 #    jobs:
