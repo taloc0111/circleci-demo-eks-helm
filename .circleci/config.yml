@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs:
-  aws-ecr: circleci/aws-ecr@6.7.0
-
 jobs:
   builb:
     docker: 
@@ -10,7 +7,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install AWS cli
+          name: Install AWS CLI
           command: | 
             apk add --no-cache curl jq py-pip
             pip install awscli 
@@ -43,7 +40,7 @@ jobs:
           command: |
             helm upgrade helloapp ~/project/chart/hello/ --namespace default --set image.repository=686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp --set image.tag=$CIRCLE_SHA1    
 workflows:
-  build_and_push_image:
+  build_push_and_deploy_image:
     jobs:
       - builb
       - hold:
