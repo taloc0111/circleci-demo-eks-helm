@@ -10,11 +10,10 @@ jobs:
     steps:
       - checkout
       - run: 
-        name: Install AWS cli
-        command: | 
-          sudo apt-get update -y
-          sudo apt-get install -y awscli
-        
+          name: Install AWS cli
+          command: | 
+            sudo apt-get update -y
+            sudo apt-get install -y awscli
 #workflows:
 #  build_and_push_image:
 #    jobs:
