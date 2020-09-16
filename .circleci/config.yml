@@ -15,9 +15,9 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y awscli
             sudo app-get install -y git
-workflows:
-  build_and_push_image:
-    jobs:
+#workflows:
+#  build_and_push_image:
+#    jobs:
       #- aws-ecr/build-and-push-image:
       #    account-url: AWS_ECR_URL
       #    aws-access-key-id: AWS_ACCESS_KEY_ID
@@ -28,6 +28,6 @@ workflows:
       #    region: AWS_REGION
       #    repo: helloapp
       #    tag: "$CIRCLE_SHA1"
-      - build:
+#      - build:
       #    requires:
       #      - aws-ecr/build-and-push-image
