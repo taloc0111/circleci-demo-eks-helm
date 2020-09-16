@@ -6,10 +6,14 @@ orbs:
 
 jobs:
   install-helm-chart:
-    docker:
-      image: yjkim1ntels/helm3-kubectl-docker
+    executor: yjkim1ntels/helm3-kubectl-docker
     steps:
       - checkout
+      - run:
+          name: check source
+            command: |
+              ls -la
+              pwd
       - run: 
           name: Install AWS cli
             command: |
@@ -20,7 +24,8 @@ jobs:
             comnand: |
               helm version
               aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
-              cat ~/.kube/config
+              cat ~/.kube/config   
+
 workflows:
   build_and_push_image:
     jobs:
