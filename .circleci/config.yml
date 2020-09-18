@@ -1,24 +1,9 @@
 version: 2.1
 
-jobs:
-  builb:
-    docker: 
-      - image: docker:latest
-    steps:
-      - checkout
-      - setup_remote_docker:
-          version: 19.03.12
-      - run:
-          name: Install AWS CLI
-          command: | 
-            apk add --no-cache curl jq py-pip
-            pip install awscli 
-      - run:
-          name: Build & Push Image
-          command: | 
-            $(aws ecr get-login --region $AWS_REGION | sed -e 's/-e none//g')
-            docker build -t 686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp:$CIRCLE_SHA1 .
-            docker push 686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp:$CIRCLE_SHA1      
+orbs:
+  aws-ecr: circleci/aws-ecr@6.7.0
+
+jobs:   
   deploy: 
     docker:
       - image: dtzar/helm-kubectl
@@ -39,13 +24,24 @@ jobs:
           command: |
             helm upgrade helloapp ~/project/chart/hello/ --namespace default --set image.repository=686978187267.dkr.ecr.ap-southeast-1.amazonaws.com/helloapp --set image.tag=$CIRCLE_SHA1    
 workflows:
-  build_push_and_deploy_image:
+  build_and_push_image:
     jobs:
-      - builb
+      - aws-ecr/build-and-push-image:
+          name: build
+          account-url: AWS_ECR_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: Dockerfile
+          path: .
+          region: AWS_REGION
+          repo: helloapp
+          tag: "$CIRCLE_SHA1"
       - hold:
           type: approval
           requires:
             - builb
       - deploy:
+          cluster-name: terraform-eks-demo
           requires:
             - hold
