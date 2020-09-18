@@ -3,7 +3,7 @@ version: 2.1
 orbs:
   aws-ecr: circleci/aws-ecr@6.7.0
 
-jobs:   
+jobs:
   deploy: 
     docker:
       - image: dtzar/helm-kubectl
@@ -40,8 +40,7 @@ workflows:
       - hold:
           type: approval
           requires:
-            - builb
+            - build
       - deploy:
-          cluster-name: terraform-eks-demo
           requires:
             - hold
